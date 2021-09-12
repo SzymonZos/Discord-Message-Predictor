@@ -43,20 +43,18 @@ async def on_error(event, *args, **kwargs):
         raise
 
 
-@bot.command(name='history', help='Responds with a message history of user')
+@bot.command(name='history', help='Responds with a message containing history of user')
 async def history(ctx, member: discord.Member):
     logs = []
-    counter = 0
-    for channel in ctx.guild.channels:
-        if isinstance(channel, discord.TextChannel):
-            try:
-                async for message in channel.history(limit=100):
-                    if message.author == member:
-                        logs.append(message.content)
-                        counter += 1
-            except discord.errors.Forbidden:
-                pass
-    dump_msgs(member, logs)
-    await ctx.send(f'{member.mention} has sent **{counter}** messages in this server.')
+    for channel in ctx.guild.text_channels:
+        try:
+            async for message in channel.history(limit=None):
+                if message.author == member:
+                    logs.append(message.content)
+        except discord.errors.Forbidden:
+            pass
+    await dump_msgs(member, logs)
+    await ctx.send(f'{member.mention} has sent **{len(logs)}** messages in this server.')
+
 
 bot.run(TOKEN)
