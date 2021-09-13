@@ -5,7 +5,10 @@ import random
 import discord
 from dotenv import load_dotenv
 from discord.ext.commands import Bot
+from tensorflow import constant as tf_constant
+from tensorflow.strings import join as tf_join
 
+from models import OneStep
 from utils import dump_msgs
 
 load_dotenv()
@@ -56,5 +59,19 @@ async def history(ctx, member: discord.Member):
     await dump_msgs(member, logs)
     await ctx.send(f'{member.mention} has sent **{len(logs)}** messages in this server.')
 
+
+@bot.command(name='echo', help='Responds with predicted answer based on given model')
+async def echo(ctx, msg: str):
+    states = None
+    next_char = tf_constant([msg])
+    result = [next_char]
+    one_step = OneStep()
+
+    for _ in range(100):
+        next_char, states = one_step.generate_one_step(next_char, states)
+        result.append(next_char)
+
+    result = tf_join(result)
+    await ctx.send(result[0].numpy().decode('utf-8'))
 
 bot.run(TOKEN)
