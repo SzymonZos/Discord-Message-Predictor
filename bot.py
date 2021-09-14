@@ -8,7 +8,7 @@ from discord.ext.commands import Bot
 from tensorflow import constant as tf_constant
 from tensorflow.strings import join as tf_join
 
-from models import OneStep
+from models import DiscordNet, OneStep
 from utils import dump_msgs
 
 load_dotenv()
@@ -65,7 +65,9 @@ async def echo(ctx, msg: str):
     states = None
     next_char = tf_constant([msg])
     result = [next_char]
-    one_step = OneStep()
+    model = DiscordNet()
+    model.load_weights("./models/prototype")
+    one_step = OneStep(model)
 
     for _ in range(100):
         next_char, states = one_step.generate_one_step(next_char, states)
