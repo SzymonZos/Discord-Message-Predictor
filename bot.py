@@ -5,16 +5,15 @@ import random
 import discord
 from dotenv import load_dotenv
 from discord.ext.commands import Bot
-from tensorflow import constant as tf_constant
-from tensorflow.strings import join as tf_join
 
-from models import DiscordNet, OneStep
+from models import load_model, decode_result, prepare_input
 from utils import dump_msgs
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 bot = Bot(command_prefix='!')
+model = load_model()
 
 
 @bot.event
@@ -62,18 +61,10 @@ async def history(ctx, member: discord.Member):
 
 @bot.command(name='echo', help='Responds with predicted answer based on given model')
 async def echo(ctx, msg: str):
-    states = None
-    next_char = tf_constant([msg])
-    result = [next_char]
-    model = DiscordNet()
-    model.load_weights("./models/prototype")
-    one_step = OneStep(model)
-
+    result, next_char, states = prepare_input(msg)
     for _ in range(100):
-        next_char, states = one_step.generate_one_step(next_char, states)
+        next_char, states = model.generate_one_step(next_char, states)
         result.append(next_char)
-
-    result = tf_join(result)
-    await ctx.send(result[0].numpy().decode('utf-8'))
+    await ctx.send(decode_result(result))
 
 bot.run(TOKEN)

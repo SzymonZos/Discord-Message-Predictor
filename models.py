@@ -1,5 +1,8 @@
+from typing import List
+
 import tensorflow as tf
 from tensorflow.keras.layers.experimental import preprocessing
+
 from utils import deserialize
 
 _vocab = deserialize("./models/vocab.pickle")
@@ -55,3 +58,19 @@ class OneStep(tf.keras.Model):
 
         predicted_chars = self.chars_from_ids(predicted_ids)
         return predicted_chars, states
+
+
+def load_model():
+    model = DiscordNet()
+    model.load_weights("./models/prototype")
+    return OneStep(model)
+
+
+def decode_result(result: List[str]):
+    result = tf.strings.join(result)
+    return result[0].numpy().decode('utf-8')
+
+
+def prepare_input(msg: str):
+    next_char = tf.constant([msg])
+    return [next_char], next_char, None
