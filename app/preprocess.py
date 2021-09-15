@@ -1,7 +1,8 @@
-import pandas as pd
 from argparse import ArgumentParser
 
-from utils import serialize
+import pandas as pd
+
+from app.utils import serialize
 
 
 def prepare_msgs(in_file: str, out_file: str):
@@ -18,21 +19,27 @@ def serialize_vocab(in_file: str, out_file: str):
     serialize(vocab, out_file)
 
 
-def main():
+_MODE_OPTIONS = {
+    "raw-msgs": prepare_msgs,
+    "serialize": serialize_vocab
+}
+
+
+def create_parser():
     parser = ArgumentParser(description="preprocess dataset")
-    parser.add_argument("--mode", action="store",
+    parser.add_argument("-m", "--mode", action="store",
                         help="Choose mode of preprocessor util",
-                        choices=["raw-msgs", "serialize-vocab"])
-    parser.add_argument("--in-file", action="store", type=str,
+                        choices=_MODE_OPTIONS.keys())
+    parser.add_argument("-i", "--in-file", action="store", type=str,
                         help="Choose input file")
-    parser.add_argument("--out-file", action="store", type=str,
+    parser.add_argument("-o", "--out-file", action="store", type=str,
                         help="Choose destination of preprocessor output")
-    args = parser.parse_args()
-    options = {
-        "raw-msgs": prepare_msgs,
-        "serialize-vocab": serialize_vocab
-    }
-    options[args.mode](args.in_file, args.out_file)
+    return parser
+
+
+def main():
+    args = create_parser().parse_args()
+    _MODE_OPTIONS[args.mode](args.in_file, args.out_file)
 
 
 if __name__ == '__main__':

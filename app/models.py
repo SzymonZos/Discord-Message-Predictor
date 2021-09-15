@@ -3,7 +3,7 @@ from typing import List
 import tensorflow as tf
 from tensorflow.keras.layers.experimental import preprocessing
 
-from utils import deserialize
+from app.utils import deserialize
 
 _vocab = deserialize("./models/vocab.pickle")
 _ids_from_chars = preprocessing.StringLookup(vocabulary=_vocab)

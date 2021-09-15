@@ -6,8 +6,8 @@ import discord
 from dotenv import load_dotenv
 from discord.ext.commands import Bot
 
-from models import load_model, decode_result, prepare_input
-from utils import dump_msgs
+from app.models import load_model, decode_result, prepare_input
+from app.utils import dump_msgs
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')

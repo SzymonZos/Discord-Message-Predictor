@@ -1,6 +1,7 @@
 from datetime import datetime
-import aiofiles
 import pickle
+
+import aiofiles
 
 
 async def get_date():
