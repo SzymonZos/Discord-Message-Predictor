@@ -4,19 +4,18 @@ from argparse import ArgumentParser
 from utils import serialize
 
 
-def prepare_msgs():
-    txt = "./logs/msg_roufluax_1007_date_2021_09_12_14_20_34_505712.txt"
-    df = pd.read_csv(txt, sep="\n", header=None)
+def prepare_msgs(in_file: str, out_file: str):
+    df = pd.read_csv(in_file, sep="\n", header=None)
     df[0] = df[0].str.replace(R"(<.+>)|(http.+)", "", regex=True)
     df = df[df[0].astype(bool)]
-    df.to_csv(r'./logs/parsed_msgs.txt', header=None, index=None, sep='\n')
+    df.to_csv(out_file, header=None, index=None, sep='\n')
 
 
-def serialize_vocab():
-    with open('./logs/parsed_msgs.txt', 'r', encoding='utf-8') as f:
+def serialize_vocab(in_file: str, out_file: str):
+    with open(in_file, 'r', encoding='utf-8') as f:
         msgs = f.read()
     vocab = list(sorted(set(msgs)))
-    serialize(vocab, "./models/vocab.pickle")
+    serialize(vocab, out_file)
 
 
 def main():
@@ -24,12 +23,16 @@ def main():
     parser.add_argument("--mode", action="store",
                         help="Choose mode of preprocessor util",
                         choices=["raw-msgs", "serialize-vocab"])
+    parser.add_argument("--in-file", action="store", type=str,
+                        help="Choose input file")
+    parser.add_argument("--out-file", action="store", type=str,
+                        help="Choose destination of preprocessor output")
     args = parser.parse_args()
     options = {
         "raw-msgs": prepare_msgs,
         "serialize-vocab": serialize_vocab
     }
-    options[args.mode]()
+    options[args.mode](args.in_file, args.out_file)
 
 
 if __name__ == '__main__':
